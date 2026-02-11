@@ -64,7 +64,7 @@ export default function PricingPage() {
   const { isSignedIn } = useAuth();
   const [loading, setLoading] = useState<string | null>(null);
 
-  const handleSubscribe = async (priceId: string | null) => {
+  const handleSubscribe = async (priceId: string | null | undefined) => {
     if (!priceId) return;
 
     if (!isSignedIn) {

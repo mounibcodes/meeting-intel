@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { analyzeTranscript } from "@/lib/ai-analysis";
 import { prisma } from "@/lib/prisma";
+import { SentimentType } from "@prisma/client";
 
 // Analyze a meeting transcript
 export async function POST(request: Request) {
@@ -50,6 +51,18 @@ export async function POST(request: Request) {
     // Run AI analysis
     const analysis = await analyzeTranscript(textToAnalyze);
 
+    // Map AI sentiment to Prisma enum
+    let sentimentValue = analysis.sentiment.toUpperCase();
+    if (sentimentValue === "CONCERNED") {
+      sentimentValue = "NEGATIVE";
+    }
+
+    // Validate and convert to Prisma SentimentType or null
+    const validSentiments = ["POSITIVE", "NEUTRAL", "NEGATIVE", "MIXED"] as const;
+    const finalSentiment: SentimentType | null = (validSentiments.includes(sentimentValue as any)
+      ? (sentimentValue as SentimentType)
+      : null);
+
     // Update meeting with analysis results
     await prisma.meeting.update({
       where: { id: meetingId },
@@ -57,7 +70,7 @@ export async function POST(request: Request) {
         title: analysis.title,
         summary: analysis.summary,
         actionItems: analysis.actionItems,
-        sentiment: analysis.sentiment.toUpperCase() as "POSITIVE" | "NEUTRAL" | "NEGATIVE" | "CONCERNED",
+        sentiment: finalSentiment,
         status: "COMPLETED",
       },
     });

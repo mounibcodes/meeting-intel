@@ -26,7 +26,7 @@ import {
 interface Meeting {
   id: string;
   title: string;
-  status: "IN_PROGRESS" | "PROCESSING" | "COMPLETED" | "FAILED";
+  status: "SCHEDULED" | "IN_PROGRESS" | "PROCESSING" | "COMPLETED" | "FAILED";
   duration: number | null;
   sentiment: string | null;
   createdAt: string;
@@ -38,6 +38,11 @@ interface MeetingsListProps {
 }
 
 const statusConfig = {
+  SCHEDULED: {
+    label: "Scheduled",
+    icon: Clock,
+    variant: "secondary" as const,
+  },
   IN_PROGRESS: {
     label: "Recording",
     icon: Mic,
@@ -111,7 +116,7 @@ export function MeetingsList({ initialMeetings }: MeetingsListProps) {
           className="sm:max-w-xs"
         />
         <div className="flex gap-2">
-          {["all", "IN_PROGRESS", "PROCESSING", "COMPLETED"].map((status) => (
+          {["all", "SCHEDULED", "IN_PROGRESS", "PROCESSING", "COMPLETED"].map((status) => (
             <Button
               key={status}
               variant={filter === status ? "default" : "outline"}
